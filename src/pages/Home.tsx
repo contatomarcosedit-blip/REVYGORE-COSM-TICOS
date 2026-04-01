@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ShoppingBag, ChevronRight, Star, ArrowRight, Quote } from 'lucide-react';
+import { ShoppingBag, ChevronRight, Star, ArrowRight, Quote, ChevronDown, Filter } from 'lucide-react';
 import { useStore } from '../store';
 import { cn } from '../lib/utils';
 import { useState, useEffect } from 'react';
@@ -44,6 +44,7 @@ export function Home() {
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
 
   const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
   const featuredProducts = products.slice(0, 3);
@@ -251,32 +252,58 @@ export function Home() {
             
             {/* Categories */}
             {categories.length > 0 && (
-              <div className="flex flex-wrap justify-center gap-3 mb-12">
-                <button
-                  onClick={() => setSelectedCategory(null)}
-                  className={cn(
-                    "px-6 py-2 rounded-full text-sm font-medium transition-all duration-300",
-                    selectedCategory === null 
-                      ? "bg-amber-500 text-zinc-950 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
-                      : "bg-zinc-900 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 border border-zinc-800"
-                  )}
-                >
-                  Todos
-                </button>
-                {categories.map(category => (
+              <div className="mb-12">
+                {/* Mobile Categories Toggle */}
+                <div className="md:hidden flex justify-center mb-4">
                   <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
+                    onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+                    className="flex items-center justify-between w-full max-w-xs px-6 py-3 bg-zinc-900 border border-zinc-800 rounded-full text-zinc-300 font-medium hover:bg-zinc-800 transition-colors"
+                  >
+                    <div className="flex items-center">
+                      <Filter className="w-4 h-4 mr-2 text-amber-500" />
+                      <span className="truncate max-w-[180px]">{selectedCategory || "Todas as Categorias"}</span>
+                    </div>
+                    <ChevronDown className={cn("w-4 h-4 transition-transform duration-300 flex-shrink-0", isCategoriesOpen ? "rotate-180" : "")} />
+                  </button>
+                </div>
+
+                {/* Categories List */}
+                <div className={cn(
+                  "flex-wrap justify-center gap-3 transition-all duration-300 overflow-hidden",
+                  isCategoriesOpen ? "flex max-h-[1000px] opacity-100 mt-4" : "hidden md:flex max-h-0 md:max-h-[1000px] opacity-0 md:opacity-100"
+                )}>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory(null);
+                      setIsCategoriesOpen(false);
+                    }}
                     className={cn(
                       "px-6 py-2 rounded-full text-sm font-medium transition-all duration-300",
-                      selectedCategory === category 
+                      selectedCategory === null 
                         ? "bg-amber-500 text-zinc-950 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
                         : "bg-zinc-900 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 border border-zinc-800"
                     )}
                   >
-                    {category}
+                    Todos
                   </button>
-                ))}
+                  {categories.map(category => (
+                    <button
+                      key={category}
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        setIsCategoriesOpen(false);
+                      }}
+                      className={cn(
+                        "px-6 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                        selectedCategory === category 
+                          ? "bg-amber-500 text-zinc-950 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
+                          : "bg-zinc-900 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 border border-zinc-800"
+                      )}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
