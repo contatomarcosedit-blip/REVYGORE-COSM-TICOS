@@ -12,12 +12,22 @@ export interface Product {
   category: string;
 }
 
+export interface Promotion {
+  id: string;
+  name: string;
+  description: string;
+  originalPrice: number;
+  promotionalPrice: number;
+  imageUrl: string;
+}
+
 export interface CartItem extends Product {
   cartQuantity: number;
 }
 
 interface StoreState {
   products: Product[];
+  promotions: Promotion[];
   cart: CartItem[];
   isAdminAuthenticated: boolean;
   loginAdmin: (user: string, pass: string) => boolean;
@@ -25,6 +35,9 @@ interface StoreState {
   addProduct: (product: Omit<Product, 'id'>) => void;
   updateProduct: (id: string, product: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
+  addPromotion: (promotion: Omit<Promotion, 'id'>) => void;
+  updatePromotion: (id: string, promotion: Partial<Promotion>) => void;
+  deletePromotion: (id: string) => void;
   addToCart: (product: Product, quantity: number) => void;
   removeFromCart: (id: string) => void;
   updateCartQuantity: (id: string, quantity: number) => void;
@@ -96,6 +109,7 @@ export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
       products: initialProducts,
+      promotions: [],
       cart: [],
       isAdminAuthenticated: false,
 
@@ -119,6 +133,18 @@ export const useStore = create<StoreState>()(
 
       deleteProduct: (id) => set((state) => ({
         products: state.products.filter(p => p.id !== id)
+      })),
+
+      addPromotion: (promotion) => set((state) => ({
+        promotions: [...state.promotions, { ...promotion, id: crypto.randomUUID() }]
+      })),
+
+      updatePromotion: (id, updatedFields) => set((state) => ({
+        promotions: state.promotions.map(p => p.id === id ? { ...p, ...updatedFields } : p)
+      })),
+
+      deletePromotion: (id) => set((state) => ({
+        promotions: state.promotions.filter(p => p.id !== id)
       })),
 
       addToCart: (product, quantity) => set((state) => {

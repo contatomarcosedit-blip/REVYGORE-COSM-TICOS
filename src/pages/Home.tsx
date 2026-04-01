@@ -37,11 +37,13 @@ const reviews = [
 
 export function Home() {
   const products = useStore((state) => state.products);
+  const promotions = useStore((state) => state.promotions);
   const addToCart = useStore((state) => state.addToCart);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  const [currentPromoIndex, setCurrentPromoIndex] = useState(0);
 
   const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
   const featuredProducts = products.slice(0, 3);
@@ -57,6 +59,14 @@ export function Home() {
     }, 5000);
     return () => clearInterval(interval);
   }, [featuredProducts.length]);
+
+  useEffect(() => {
+    if (promotions.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentPromoIndex((prev) => (prev + 1) % promotions.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [promotions.length]);
 
   useEffect(() => {
     if (reviews.length === 0) return;
@@ -106,26 +116,26 @@ export function Home() {
       {featuredProducts.length > 0 && (
         <section className="py-12 bg-zinc-950 border-b border-zinc-900">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative rounded-3xl overflow-hidden bg-zinc-900 aspect-[21/9] md:aspect-[3/1] flex items-center">
+            <div className="relative rounded-3xl overflow-hidden bg-zinc-900 min-h-[450px] md:min-h-0 md:aspect-[3/1] flex items-center">
               {featuredProducts.map((product, index) => (
                 <div 
                   key={product.id}
                   className={cn(
                     "absolute inset-0 flex items-center transition-opacity duration-1000",
-                    index === currentBannerIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+                    index === currentBannerIndex ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                   )}
                 >
-                  <img src={product.imageUrl} alt={product.name} className="absolute inset-0 w-full h-full object-cover opacity-30" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-transparent" />
-                  <div className="relative z-20 p-8 md:p-16 max-w-2xl">
-                    <span className="inline-block px-3 py-1 bg-amber-500/20 text-amber-500 text-xs font-bold uppercase tracking-wider rounded-full mb-4">
+                  <img src={product.imageUrl} alt={product.name} className="absolute inset-0 w-full h-full object-cover opacity-40 md:opacity-30" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent md:bg-gradient-to-r md:from-zinc-950 md:via-zinc-950/80 md:to-transparent" />
+                  <div className="relative z-20 p-6 md:p-16 max-w-2xl mt-auto md:mt-0 w-full text-center md:text-left pb-16 md:pb-16">
+                    <span className="inline-block px-3 py-1 bg-amber-500/20 text-amber-500 text-xs font-bold uppercase tracking-wider rounded-full mb-3 md:mb-4">
                       Destaque
                     </span>
-                    <h2 className="text-3xl md:text-5xl font-serif font-bold text-white mb-4">{product.name}</h2>
-                    <p className="text-zinc-300 mb-8 line-clamp-2 md:line-clamp-3">{product.description}</p>
+                    <h2 className="text-2xl md:text-5xl font-serif font-bold text-white mb-3 md:mb-4">{product.name}</h2>
+                    <p className="text-zinc-300 mb-6 md:mb-8 line-clamp-2 md:line-clamp-3 text-sm md:text-base">{product.description}</p>
                     <button 
                       onClick={() => addToCart(product, 1)}
-                      className="inline-flex items-center px-6 py-3 bg-white text-zinc-950 font-medium rounded-full hover:bg-zinc-200 transition-colors"
+                      className="inline-flex items-center justify-center px-6 py-3 bg-white text-zinc-950 font-medium rounded-full hover:bg-zinc-200 transition-colors w-full md:w-auto"
                     >
                       <ShoppingBag className="w-4 h-4 mr-2" />
                       Comprar Agora
@@ -135,7 +145,7 @@ export function Home() {
               ))}
               
               {/* Carousel Indicators */}
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
+              <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-30 flex space-x-2">
                 {featuredProducts.map((_, index) => (
                   <button
                     key={index}
@@ -144,6 +154,86 @@ export function Home() {
                       "w-2 h-2 rounded-full transition-all duration-300",
                       index === currentBannerIndex ? "bg-amber-500 w-6" : "bg-zinc-600 hover:bg-zinc-400"
                     )}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Promotions Carousel */}
+      {promotions.length > 0 && (
+        <section className="py-16 bg-zinc-950 border-b border-zinc-900">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-serif font-bold text-white mb-4">Promoções Especiais</h2>
+              <div className="w-24 h-1 bg-amber-500 mx-auto rounded-full" />
+            </div>
+            
+            <div className="relative rounded-3xl overflow-hidden bg-zinc-900 min-h-[550px] md:min-h-[400px] flex items-center shadow-2xl border border-zinc-800">
+              {promotions.map((promo, index) => (
+                <div 
+                  key={promo.id}
+                  className={cn(
+                    "absolute inset-0 flex flex-col md:flex-row items-center transition-all duration-700 ease-in-out",
+                    index === currentPromoIndex 
+                      ? "opacity-100 z-10" 
+                      : "opacity-0 z-0 pointer-events-none"
+                  )}
+                >
+                  {/* Background Image for Mobile / Half Image for Desktop */}
+                  <div className="absolute inset-0 md:relative md:w-1/2 h-full">
+                    <img src={promo.imageUrl} alt={promo.name} className="w-full h-full object-cover opacity-30 md:opacity-100" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/80 to-transparent md:hidden" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-900/50 to-zinc-900 hidden md:block" />
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="relative z-20 p-6 md:p-16 w-full md:w-1/2 flex flex-col justify-end md:justify-center h-full text-center md:text-left mt-auto md:mt-0 pb-16 md:pb-16">
+                    <span className="inline-block px-4 py-1.5 bg-red-500/20 text-red-500 text-xs md:text-sm font-bold uppercase tracking-wider rounded-full mb-4 md:mb-6 self-center md:self-start border border-red-500/30">
+                      Oferta Limitada
+                    </span>
+                    <h3 className="text-2xl md:text-4xl font-serif font-bold text-white mb-3 md:mb-4 leading-tight">{promo.name}</h3>
+                    <p className="text-zinc-300 mb-6 md:mb-8 line-clamp-3 text-sm md:text-lg">{promo.description}</p>
+                    
+                    <div className="flex flex-row items-center justify-center md:justify-start gap-4 md:gap-6 mb-6 md:mb-8">
+                      <div className="flex flex-col items-center md:items-start">
+                        <span className="text-xs md:text-sm text-zinc-500 uppercase tracking-wider mb-1">De</span>
+                        <span className="text-xl md:text-2xl text-zinc-500 line-through decoration-red-500/50">
+                          R$ {promo.originalPrice.toFixed(2).replace('.', ',')}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center md:items-start">
+                        <span className="text-xs md:text-sm text-amber-500 uppercase tracking-wider font-bold mb-1">Por apenas</span>
+                        <span className="text-3xl md:text-5xl font-bold text-amber-500">
+                          R$ {promo.promotionalPrice.toFixed(2).replace('.', ',')}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <a 
+                      href="#produtos"
+                      className="inline-flex items-center justify-center px-6 md:px-8 py-3 md:py-4 bg-amber-500 text-zinc-950 font-bold rounded-full hover:bg-amber-400 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] w-full md:w-auto text-sm md:text-base"
+                    >
+                      Aproveitar Oferta
+                      <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Carousel Indicators */}
+              <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-30 flex space-x-2 md:space-x-3">
+                {promotions.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentPromoIndex(index)}
+                    className={cn(
+                      "w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-all duration-300",
+                      index === currentPromoIndex ? "bg-amber-500 w-6 md:w-8" : "bg-zinc-600 hover:bg-zinc-400"
+                    )}
+                    aria-label={`Ver promoção ${index + 1}`}
                   />
                 ))}
               </div>
